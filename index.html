@@ -173,6 +173,55 @@
   button:hover { background: var(--accent); border-color: var(--accent); }
   button.danger { background: transparent; color: var(--ink); padding: 6px 10px; font-size: 12px; }
   button.danger:hover { background: var(--accent); color: var(--paper); }
+  button.edit-btn { background: transparent; color: var(--ink); padding: 6px 10px; font-size: 12px; border-color: var(--muted); }
+  button.edit-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* Edit Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,24,21,0.55);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 28px;
+    width: min(520px, 92vw);
+    box-shadow: 6px 6px 0 var(--ink);
+    position: relative;
+  }
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-title::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .modal-grid .field:first-child { grid-column: 1 / -1; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-save { background: var(--ink); color: var(--paper); }
+  .btn-save:hover { background: var(--green); border-color: var(--green); }
+  .btn-cancel { background: transparent; color: var(--ink); }
+  .btn-cancel:hover { background: var(--accent); color: var(--paper); }
 
   /* Table */
   table { width: 100%; border-collapse: collapse; }
@@ -296,6 +345,35 @@
   <footer>— ระบบจัดการร้านค้า · จัดทำเพื่อการศึกษา —</footer>
 </div>
 
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editOverlay" onclick="closeEditIfOutside(event)">
+  <div class="modal">
+    <div class="modal-title">แก้ไขสินค้า</div>
+    <div class="modal-grid">
+      <div class="field">
+        <label>ชื่อสินค้า</label>
+        <input type="text" id="edit-name" placeholder="ชื่อสินค้า">
+      </div>
+      <div class="field">
+        <label>ราคา (บาท)</label>
+        <input type="number" id="edit-price" placeholder="0" min="0">
+      </div>
+      <div class="field">
+        <label>ทุน (บาท)</label>
+        <input type="number" id="edit-cost" placeholder="0" min="0">
+      </div>
+      <div class="field">
+        <label>จำนวน</label>
+        <input type="number" id="edit-qty" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEdit()">ยกเลิก</button>
+      <button class="btn-save" onclick="saveEdit()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <script>
   let products = [];
 
@@ -330,6 +408,45 @@
     render();
   }
 
+  let editingId = null;
+
+  function openEdit(id) {
+    const p = products.find(p => p.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('edit-name').value = p.name;
+    document.getElementById('edit-price').value = p.price;
+    document.getElementById('edit-cost').value = p.cost;
+    document.getElementById('edit-qty').value = p.qty;
+    document.getElementById('editOverlay').classList.add('open');
+    document.getElementById('edit-name').focus();
+  }
+
+  function closeEdit() {
+    editingId = null;
+    document.getElementById('editOverlay').classList.remove('open');
+  }
+
+  function closeEditIfOutside(e) {
+    if (e.target === document.getElementById('editOverlay')) closeEdit();
+  }
+
+  function saveEdit() {
+    const name = document.getElementById('edit-name').value.trim();
+    const price = parseFloat(document.getElementById('edit-price').value) || 0;
+    const cost = parseFloat(document.getElementById('edit-cost').value) || 0;
+    const qty = parseInt(document.getElementById('edit-qty').value) || 0;
+    if (!name || price <= 0) {
+      alert('กรุณากรอกชื่อและราคาสินค้า');
+      return;
+    }
+    const idx = products.findIndex(p => p.id === editingId);
+    if (idx !== -1) products[idx] = { ...products[idx], name, price, cost, qty };
+    saveData();
+    render();
+    closeEdit();
+  }
+
   function getStockBadge(qty) {
     if (qty === 0) return '<span class="stock-badge stock-out">หมด</span>';
     if (qty < 10) return `<span class="stock-badge stock-low">${qty} (ใกล้หมด)</span>`;
@@ -349,7 +466,10 @@
           <td>฿${p.cost.toLocaleString()}</td>
           <td class="price" style="color: var(--green)">+฿${(p.price - p.cost).toLocaleString()}</td>
           <td>${getStockBadge(p.qty)}</td>
-          <td><button class="danger" onclick="deleteProduct(${p.id})">ลบ</button></td>
+          <td style="display:flex;gap:6px;align-items:center">
+            <button class="edit-btn" onclick="openEdit(${p.id})">แก้ไข</button>
+            <button class="danger" onclick="deleteProduct(${p.id})">ลบ</button>
+          </td>
         </tr>
       `).join('');
     }
