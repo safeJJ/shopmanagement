@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ร้านค้าของฉัน | ระบบจัดการสินค้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --ink: #1a1815;
+    --paper: #fffdf8;
+    --accent: #d4541c;
+    --accent-soft: #f0d4c4;
+    --green: #3d6b3a;
+    --muted: #8a8478;
+    --line: #1a1815;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(26,24,21,0.08) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .brand-mark {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 2px solid var(--paper);
+    border-radius: 50%;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 44px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .date {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  /* KPI Cards */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 20px;
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .stat-card.accent .stat-value { color: var(--accent); }
+  .stat-card.success .stat-value { color: var(--green); }
+  .stat-unit { font-size: 14px; color: var(--muted); margin-left: 4px; }
+
+  /* Form */
+  .panel {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .panel-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-title::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+  @media (max-width: 720px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .field input {
+    font-family: inherit;
+    font-size: 15px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--ink);
+    background: var(--bg);
+    transition: background 0.15s;
+  }
+  .field input:focus { outline: none; background: var(--accent-soft); }
+  button {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 22px;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1.5px solid var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  button:hover { background: var(--accent); border-color: var(--accent); }
+  button.danger { background: transparent; color: var(--ink); padding: 6px 10px; font-size: 12px; }
+  button.danger:hover { background: var(--accent); color: var(--paper); }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--ink);
+    font-weight: 600;
+  }
+  tbody td {
+    padding: 14px 12px;
+    border-bottom: 1px dashed rgba(26,24,21,0.2);
+    font-size: 15px;
+  }
+  tbody tr:hover { background: var(--accent-soft); }
+  .empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+  .price { font-family: 'Fraunces', serif; font-weight: 600; }
+  .stock-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .stock-ok { background: #d8e6d6; color: var(--green); }
+  .stock-low { background: #fde0d4; color: var(--accent); }
+  .stock-out { background: var(--ink); color: var(--paper); }
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <h1>ร้านค้าของฉัน</h1>
+        <div class="tag">Inventory · Sales · Stock</div>
+      </div>
+    </div>
+    <div class="date" id="today"></div>
+  </header>
+
+  <section class="stats">
+    <div class="stat-card">
+      <div class="stat-label">รายการสินค้า</div>
+      <div class="stat-value"><span id="totalItems">0</span><span class="stat-unit">รายการ</span></div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-label">มูลค่าสต็อกรวม</div>
+      <div class="stat-value">฿<span id="totalValue">0</span></div>
+    </div>
+    <div class="stat-card accent">
+      <div class="stat-label">สินค้าใกล้หมด</div>
+      <div class="stat-value"><span id="lowStock">0</span><span class="stat-unit">ชิ้น</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">สต็อกทั้งหมด</div>
+      <div class="stat-value"><span id="totalQty">0</span><span class="stat-unit">หน่วย</span></div>
+    </div>
+  </section>
+
+  <div class="panel">
+    <div class="panel-title">เพิ่มสินค้าใหม่</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>ชื่อสินค้า</label>
+        <input type="text" id="name" placeholder="เช่น กาแฟอเมริกาโน่">
+      </div>
+      <div class="field">
+        <label>ราคา (บาท)</label>
+        <input type="number" id="price" placeholder="0" min="0">
+      </div>
+      <div class="field">
+        <label>ทุน (บาท)</label>
+        <input type="number" id="cost" placeholder="0" min="0">
+      </div>
+      <div class="field">
+        <label>จำนวน</label>
+        <input type="number" id="qty" placeholder="0" min="0">
+      </div>
+      <button onclick="addProduct()">เพิ่ม +</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">รายการสินค้าทั้งหมด</div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>ชื่อสินค้า</th>
+          <th>ราคา</th>
+          <th>ทุน</th>
+          <th>กำไร/ชิ้น</th>
+          <th>สต็อก</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>— ระบบจัดการร้านค้า · จัดทำเพื่อการศึกษา —</footer>
+</div>
+
+<script>
+  let products = [];
+
+  function loadData() {
+    const saved = localStorage.getItem('shop-products');
+    if (saved) products = JSON.parse(saved);
+  }
+  function saveData() {
+    localStorage.setItem('shop-products', JSON.stringify(products));
+  }
+
+  function addProduct() {
+    const name = document.getElementById('name').value.trim();
+    const price = parseFloat(document.getElementById('price').value) || 0;
+    const cost = parseFloat(document.getElementById('cost').value) || 0;
+    const qty = parseInt(document.getElementById('qty').value) || 0;
+    if (!name || price <= 0) {
+      alert('กรุณากรอกชื่อและราคาสินค้า');
+      return;
+    }
+    products.push({ id: Date.now(), name, price, cost, qty });
+    saveData();
+    render();
+    ['name','price','cost','qty'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('name').focus();
+  }
+
+  function deleteProduct(id) {
+    if (!confirm('ลบสินค้านี้?')) return;
+    products = products.filter(p => p.id !== id);
+    saveData();
+    render();
+  }
+
+  function getStockBadge(qty) {
+    if (qty === 0) return '<span class="stock-badge stock-out">หมด</span>';
+    if (qty < 10) return `<span class="stock-badge stock-low">${qty} (ใกล้หมด)</span>`;
+    return `<span class="stock-badge stock-ok">${qty}</span>`;
+  }
+
+  function render() {
+    const tbody = document.getElementById('tbody');
+    if (products.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">ยังไม่มีสินค้า · เริ่มต้นเพิ่มสินค้าด้านบนได้เลย</td></tr>';
+    } else {
+      tbody.innerHTML = products.map((p, i) => `
+        <tr>
+          <td>${String(i+1).padStart(2,'0')}</td>
+          <td><strong>${p.name}</strong></td>
+          <td class="price">฿${p.price.toLocaleString()}</td>
+          <td>฿${p.cost.toLocaleString()}</td>
+          <td class="price" style="color: var(--green)">+฿${(p.price - p.cost).toLocaleString()}</td>
+          <td>${getStockBadge(p.qty)}</td>
+          <td><button class="danger" onclick="deleteProduct(${p.id})">ลบ</button></td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('totalItems').textContent = products.length;
+    const totalQty = products.reduce((s,p) => s + p.qty, 0);
+    const totalValue = products.reduce((s,p) => s + p.price * p.qty, 0);
+    const lowStock = products.filter(p => p.qty > 0 && p.qty < 10).length;
+    document.getElementById('totalQty').textContent = totalQty.toLocaleString();
+    document.getElementById('totalValue').textContent = totalValue.toLocaleString();
+    document.getElementById('lowStock').textContent = lowStock;
+  }
+
+  function showDate() {
+    const d = new Date();
+    const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    document.getElementById('today').textContent =
+      `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+  }
+
+  loadData();
+  showDate();
+  render();
+</script>
+</body>
+</html>
