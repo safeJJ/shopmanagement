@@ -453,6 +453,11 @@
     return `<span class="stock-badge stock-ok">${qty}</span>`;
   }
 
+  function escapeHtml(value) {
+    const escapes = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    return String(value).replace(/[&<>"']/g, char => escapes[char]);
+  }
+
   function render() {
     const tbody = document.getElementById('tbody');
     if (products.length === 0) {
@@ -461,7 +466,7 @@
       tbody.innerHTML = products.map((p, i) => `
         <tr>
           <td>${String(i+1).padStart(2,'0')}</td>
-          <td><strong>${p.name}</strong></td>
+          <td><strong>${escapeHtml(p.name)}</strong></td>
           <td class="price">฿${p.price.toLocaleString()}</td>
           <td>฿${p.cost.toLocaleString()}</td>
           <td class="price" style="color: var(--green)">+฿${(p.price - p.cost).toLocaleString()}</td>
